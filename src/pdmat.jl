@@ -26,6 +26,7 @@ PDMat{T,S}(pdm::PDMat{T,S}) where {T,S} = pdm
 PDMat{T,S}(pdm::PDMat) where {T,S} = PDMat{T,S}(pdm.mat, pdm.chol)
 PDMat{T}(pdm::PDMat{T}) where T = pdm
 PDMat{T}(pdm::PDMat) where T = PDMat{T}(pdm.mat, pdm.chol)
+PDMat(pdm::PDMat) = pdm
 
 # Construction from an AbstractMatrix
 function PDMat{T,S}(mat::AbstractMatrix) where {T,S}

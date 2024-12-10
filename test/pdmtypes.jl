@@ -30,6 +30,7 @@ using Test
             @testset "PDMat from PDMat" begin
                 pdM = PDMat(M)
                 pdf64M = PDMat(f64M)
+                @test pdM === PDMat(pdM)
                 test_pdmat(PDMat(pdM), M,                      cmat_eq=true, verbose=1)
                 test_pdmat(PDMat{Float64}(pdf64M), f64M,       cmat_eq=true, verbose=1)
                 test_pdmat(PDMat{Float64,Matrix{Float64}}(pdf64M), f64M, cmat_eq=true, verbose=1)
