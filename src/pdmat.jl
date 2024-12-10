@@ -18,7 +18,7 @@ end
 PDMat{T,S}(pdm::PDMat) where {T,S} = PDMat{T,S}(pdm.mat, pdm.chol)
 
 function PDMat{T}(m::AbstractMatrix, c::Cholesky) where T
-    c = Cholesky{T}(c)
+    c = convert(Cholesky{T}, c)
     return PDMat{T,mattype(c)}(m, c)
 end
 PDMat{T}(pdm::PDMat) where T = PDMat{T}(pdm.mat, pdm.chol)
