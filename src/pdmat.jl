@@ -60,8 +60,6 @@ Base.propertynames(::PDMat) = (:mat, :chol, :dim)
 AbstractPDMat(A::Cholesky) = PDMat(A)
 
 ### Conversion
-Base.convert(::Type{PDMat{T,S}}, a::PDMat{T,S}) where {T<:Real,S<:AbstractMatrix{T}} = a
-Base.convert(::Type{PDMat{T,S}}, a::PDMat) where {T<:Real,S<:AbstractMatrix{T}} = PDMat{T,S}(a)
 Base.convert(::Type{PDMat{T}}, a::PDMat{T}) where {T<:Real} = a
 Base.convert(::Type{PDMat{T}}, a::PDMat) where {T<:Real} = PDMat{T}(a)
 
