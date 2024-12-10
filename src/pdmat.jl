@@ -1,23 +1,49 @@
 """
 Full positive definite matrix together with a Cholesky factorization object.
 """
-struct PDMat{T<:Real,S<:AbstractMatrix} <: AbstractPDMat{T}
+struct PDMat{T<:Real,S<:AbstractMatrix{T}} <: AbstractPDMat{T}
     mat::S
     chol::Cholesky{T,S}
 
-    PDMat{T,S}(m::AbstractMatrix{T},c::Cholesky{T,S}) where {T,S} = new{T,S}(m,c)
-end
-
-function PDMat(mat::AbstractMatrix,chol::Cholesky{T,S}) where {T,S}
-    d = LinearAlgebra.checksquare(mat)
-    if size(chol, 1) != d
-        throw(DimensionMismatch("Dimensions of mat and chol are inconsistent."))
+    function PDMat{T,S}(m::AbstractMatrix, c::Cholesky) where {T,S}
+        d = LinearAlgebra.checksquare(m)
+        if size(c, 1) != d
+            throw(DimensionMismatch("Dimensions of mat and chol are inconsistent."))
+        end
+        # in principle we might want to check that `c` is a Cholesky factorization of `m`,
+        # but that's slow
+        return new{T,S}(m,c)
     end
-    PDMat{T,S}(convert(S, mat), chol)
 end
+PDMat{T,S}(pdm::PDMat) where {T,S} = PDMat{T,S}(pdm.mat, pdm.chol)
 
+function PDMat{T}(m::AbstractMatrix, c::Cholesky) where T
+    c = Cholesky{T}(c)
+    return PDMat{T,mattype(c)}(m, c)
+end
+PDMat{T}(pdm::PDMat) where T = PDMat{T}(pdm.mat, pdm.chol)
+
+PDMat(mat::AbstractMatrix,chol::Cholesky{T,S}) where {T,S} = PDMat{T,S}(mat, chol)
+
+function PDMat{T,S}(mat::AbstractMatrix) where {T,S}
+    mat = convert(S, mat)
+    return PDMat{T,S}(mat, cholesky(mat))
+end
+function PDMat{T}(mat::AbstractMatrix) where T
+    mat = convert(AbstractMatrix{T}, mat)
+    return PDMat{T}(mat, cholesky(mat))
+end
 PDMat(mat::AbstractMatrix) = PDMat(mat, cholesky(mat))
-PDMat(fac::Cholesky) = PDMat(AbstractMatrix(fac), fac)
+
+function PDMat{T,S}(c::Cholesky) where {T,S}
+    c = Cholesky{T,S}(c)
+    return PDMat{T,S}(AbstractMatrix(c), c)
+end
+function PDMat{T}(c::Cholesky) where T
+    c = Cholesky{T}(c)
+    return PDMat{T}(AbstractMatrix(c), c)
+end
+PDMat(c::Cholesky) = PDMat(AbstractMatrix(c), c)
 
 function Base.getproperty(a::PDMat, s::Symbol)
     if s === :dim
@@ -30,13 +56,11 @@ Base.propertynames(::PDMat) = (:mat, :chol, :dim)
 AbstractPDMat(A::Cholesky) = PDMat(A)
 
 ### Conversion
+Base.convert(::Type{PDMat{T,S}}, a::PDMat{T,S}) where {T<:Real,S<:AbstractMatrix{T}} = a
+Base.convert(::Type{PDMat{T,S}}, a::PDMat) where {T<:Real,S<:AbstractMatrix{T}} = PDMat{T,S}(a)
 Base.convert(::Type{PDMat{T}}, a::PDMat{T}) where {T<:Real} = a
-function Base.convert(::Type{PDMat{T}}, a::PDMat) where {T<:Real}
-    chol = convert(Cholesky{T}, a.chol)
-    S = typeof(chol.factors)
-    mat = convert(S, a.mat)
-    return PDMat{T,S}(mat, chol)
-end
+Base.convert(::Type{PDMat{T}}, a::PDMat) where {T<:Real} = PDMat{T}(a)
+
 Base.convert(::Type{AbstractPDMat{T}}, a::PDMat) where {T<:Real} = convert(PDMat{T}, a)
 
 ### Basics
