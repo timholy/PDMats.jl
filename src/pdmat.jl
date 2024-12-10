@@ -36,7 +36,7 @@ end
 PDMat(mat::AbstractMatrix) = PDMat(mat, cholesky(mat))
 
 function PDMat{T,S}(c::Cholesky) where {T,S}
-    c = Cholesky{T,S}(c)
+    c = convert(Cholesky{T,S}, c)
     return PDMat{T,S}(AbstractMatrix(c), c)
 end
 function PDMat{T}(c::Cholesky) where T
