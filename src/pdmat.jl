@@ -15,16 +15,19 @@ struct PDMat{T<:Real,S<:AbstractMatrix{T}} <: AbstractPDMat{T}
         return new{T,S}(m,c)
     end
 end
-PDMat{T,S}(pdm::PDMat) where {T,S} = PDMat{T,S}(pdm.mat, pdm.chol)
-
 function PDMat{T}(m::AbstractMatrix, c::Cholesky) where T
     c = convert(Cholesky{T}, c)
     return PDMat{T,mattype(c)}(m, c)
 end
-PDMat{T}(pdm::PDMat) where T = PDMat{T}(pdm.mat, pdm.chol)
-
 PDMat(mat::AbstractMatrix,chol::Cholesky{T,S}) where {T,S} = PDMat{T,S}(mat, chol)
 
+# Construction from another PDMat
+PDMat{T,S}(pdm::PDMat{T,S}) where {T,S} = pdm
+PDMat{T,S}(pdm::PDMat) where {T,S} = PDMat{T,S}(pdm.mat, pdm.chol)
+PDMat{T}(pdm::PDMat{T}) where T = pdm
+PDMat{T}(pdm::PDMat) where T = PDMat{T}(pdm.mat, pdm.chol)
+
+# Construction from an AbstractMatrix
 function PDMat{T,S}(mat::AbstractMatrix) where {T,S}
     mat = convert(S, mat)
     return PDMat{T,S}(mat, cholesky(mat))
@@ -35,12 +38,13 @@ function PDMat{T}(mat::AbstractMatrix) where T
 end
 PDMat(mat::AbstractMatrix) = PDMat(mat, cholesky(mat))
 
+# Construction from a Cholesky factorization
 function PDMat{T,S}(c::Cholesky) where {T,S}
     c = convert(Cholesky{T,S}, c)
     return PDMat{T,S}(AbstractMatrix(c), c)
 end
 function PDMat{T}(c::Cholesky) where T
-    c = Cholesky{T}(c)
+    c = convert(Cholesky{T}, c)
     return PDMat{T}(AbstractMatrix(c), c)
 end
 PDMat(c::Cholesky) = PDMat(AbstractMatrix(c), c)
