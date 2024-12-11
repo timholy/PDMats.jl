@@ -25,8 +25,6 @@ if HAVE_CHOLMOD
     chol_upper(cf::CholTypeSparse) = cf.UP
 end
 
-mattype(::Cholesky{T,S}) where {T,S} = S
-
 # Interface for `Cholesky`
 
 dim(A::Cholesky) = LinearAlgebra.checksquare(A)

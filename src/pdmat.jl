@@ -17,12 +17,12 @@ struct PDMat{T<:Real,S<:AbstractMatrix{T}} <: AbstractPDMat{T}
 end
 function PDMat{T}(m::AbstractMatrix, c::Cholesky) where T
     c = convert(Cholesky{T}, c)
-    return PDMat{T,mattype(c)}(m, c)
+    return PDMat{T,typeof(c.factors)}(m, c)
 end
 PDMat(mat::AbstractMatrix,chol::Cholesky{T,S}) where {T,S} = PDMat{T,S}(mat, chol)
 
 # Construction from another PDMat
-PDMat{T,S}(pdm::PDMat{T,S}) where {T,S} = pdm
+PDMat{T,S}(pdm::PDMat{T,S}) where {T,S} = pdm  # since PDMat doesn't support `setindex!` it's not mutable (xref https://docs.julialang.org/en/v1/manual/conversion-and-promotion/#Mutable-collections)
 PDMat{T,S}(pdm::PDMat) where {T,S} = PDMat{T,S}(pdm.mat, pdm.chol)
 PDMat{T}(pdm::PDMat{T}) where T = pdm
 PDMat{T}(pdm::PDMat) where T = PDMat{T}(pdm.mat, pdm.chol)
@@ -82,7 +82,7 @@ Base.IndexStyle(::Type{PDMat{T,S}}) where {T,S} = Base.IndexStyle(S)
 # Linear Indexing
 Base.@propagate_inbounds Base.getindex(a::PDMat, i::Int) = getindex(a.mat, i)
 # Cartesian Indexing
-Base.@propagate_inbounds Base.getindex(a::PDMat, I::Vararg{Int, 2}) = getindex(a.mat, I...)
+Base.@propagate_inbounds Base.getindex(a::PDMat, i::Int, j::Int) = getindex(a.mat, i, j)
 
 ### Arithmetics
 
